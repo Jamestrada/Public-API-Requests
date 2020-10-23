@@ -1,7 +1,16 @@
+/**********************************************
+List Pagination and Filtering
+Developed by: James Estrada 
+
+Employee directory
+***********************************************/
+
 const endpoint = 'https://randomuser.me/api/?results=12&nat=us'; //au,ca,gb,ie,nz,
 const gallery = document.getElementById('gallery');
 const body = document.querySelector('body');
+let employees;
 
+// check if data is fetched successfully 
 async function getJSON(url) {
     try {
         const response = await fetch(url);
@@ -10,14 +19,15 @@ async function getJSON(url) {
         throw error;
     }
 }
- 
+
+// fetch and get a response from API
 async function displayEmployees() {
     const employees = await getJSON(endpoint);
     return employees;
 }
 
+// dynamically parse the json data from API response and generate html
 function generateGallery(data) {
-    console.log(data);
     data.results.map( employee => {
         const divCard = document.createElement('div');
         divCard.classList.add('card');
@@ -57,54 +67,71 @@ function generateGallery(data) {
                     <p class="modal-text">${employee.location.street.number} ${employee.location.street.name}, ${employee.location.city}, ${employee.location.state}, ${employee.location.postcode}</p>
                     <p class="modal-text">Birthday: ${birthday.replace(/(\d{4})-(\d{2})-(\d{2})/, '$2/$3/$1')}</p>
                 </div>
+                <div class="modal-btn-container">
+                    <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
+                    <button type="button" id="modal-next" class="modal-next btn">Next</button>
+                </div>
             </div>
         `);
+
+        // attach event listeners to the modal buttons (close, previous, next)
+        const closeButton = modal.querySelector('.modal-close-btn');
+        const prevButton = modal.querySelector('#modal-prev');
+        const nextButton = modal.querySelector('#modal-next');
+
+        closeButton.addEventListener('click', () => {
+            modal.style.display = 'none';
+            modal.firstElementChild.style.display = 'none';
+        });
+
+        prevButton.addEventListener('click', () => {
+            modal.style.display = 'none';
+            modal.firstElementChild.style.display = 'none';
+
+            if (modal.previousElementSibling.firstElementChild) {
+                modal.previousElementSibling.style.display = 'block';
+                modal.previousElementSibling.firstElementChild.style.display = 'block';
+            } else {
+                const modals = document.querySelectorAll('.modal-container');
+                modals[modals.length-1].style.display = 'block';
+                modals[modals.length-1].firstElementChild.style.display = 'block';
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            modal.style.display = 'none';
+            modal.firstElementChild.style.display = 'none';
+            
+            if (modal.nextElementSibling) {
+                modal.nextElementSibling.style.display = 'block';
+                modal.nextElementSibling.firstElementChild.style.display = 'block';
+            } else {
+                const modals = document.querySelectorAll('.modal-container');
+                modals[0].style.display = 'block';
+                modals[0].firstElementChild.style.display = 'block';
+            }
+        });
     });
 
     modalListener();
 }
 
+// display the modal of selected employee
 function modalListener() {
     const modals = document.querySelectorAll('.modal-container');
     const cards = document.querySelectorAll('.card');
+    employees = cards;
     for (let i = 0; i < cards.length; i++) {
-        // console.log(cards[i]);
-        // cards[i].addEventListener('click', openModal(i));
         cards[i].addEventListener('click', () => {
             const modal = modals[i].querySelector('.modal');
-            const closeButton = modal.querySelector('.modal-close-btn');
 
             modals[i].style.display = 'block';
             modal.style.display = 'block';
 
-            closeButton.addEventListener('click', () => {
-                modal.style.display = 'none';
-                modal.parentNode.style.display = 'none';
-            });
-
         });
     }
-    // closeButton.addEventListener('click', closeModal[modals[i]]);
 }
 
-function openModal(card) {
-    // console.log(card);
-    // const modals = document.querySelectorAll('.modal');
-    // const modal = modals[card];
-    // const container = modal.querySelector('.modal-info-container');
-    // modal.style.display = '';
-    // container.style.display = '';
-}
-
-function closeModal(modal) {
-    const container = modal.querySelector('.modal-info-container');
-    modal.style.display = 'none';
-    container.style.display = 'none';
-}
-
-// function handleError(err) {
-//     console.log(err);
-// }
-
+// execute generateGallery if the response of promise is successful.
 displayEmployees()
     .then(generateGallery)
