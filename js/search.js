@@ -27,7 +27,7 @@ const search = (input, employees) => {
         employee.style.display = 'none';
         const employeeName = employee.childNodes[3];
         if (employeeName.firstElementChild.textContent.toLowerCase().includes(input.value.toLowerCase())) {
-            employee.style.display = 'block';
+            employee.style.display = 'flex';
         }
     }
 
